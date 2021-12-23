@@ -1,0 +1,28 @@
+{
+	"network": {
+		"address":		"172.16.0.0/24",
+		"domainname":	"example-privlan.net"
+	},
+	"concentrator": {
+		"name": "concentrator",
+		"hostname":	"my-host.example.com",
+		"port":	51820
+	},
+	"clients": [
+		{
+			"name": "ds9"
+		},
+		{
+			"name": "reliant",
+			"fixed_ip": "172.16.0.1"
+		},
+		{
+			"name": "deltaflyer",
+			"ifname": "wg8"
+		}
+	],
+	"route": [
+		"* -> ds9",
+		"reliant <-> deltaflyer"
+	]
+}
