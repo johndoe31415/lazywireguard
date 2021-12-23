@@ -54,21 +54,21 @@ $ cat example-privlan.net/concentrator/wg0.conf
 [Interface]
 Address = 172.16.0.2/24
 ListenPort = 51820
-PrivateKey = KJIoMZ76q7nK7FTKcZEDGPm+AKaDLVP5OhQt4VOmkEg=
+PrivateKey = WBVS8PQMzu9RaadKTiqbdod/9xrMBbRAkBl3t/N1yHI=
 
 # ds9
 [Peer]
-PublicKey = Qu6W+7F5MF1DpJiiRTenq1RaZH04ycmja9W77ZjTm1g=
+PublicKey = GNYbsEP/8Dis3sLJLgQNpSJcYziodj/r/cjegRi4Xys=
 AllowedIPs = 172.16.0.3/32
 
 # reliant
 [Peer]
-PublicKey = 3MuE6aG6Ri+eLNNBoeBtkOtHuykMALRftYoZ6UK9FWY=
+PublicKey = qkQCo6MgGT0WON1/jBZSP8mfDkMh/W2k+7u2kG5rj0o=
 AllowedIPs = 172.16.0.1/32
 
 # deltaflyer
 [Peer]
-PublicKey = UVrTVF/i8oenOaXhoCGTU+6YwtXJLiCpaVOuR49/XDg=
+PublicKey = XJ6rH2Y0hkbdEToACuqW0M/+h8jU52Zgg5qTtlp/ilI=
 AllowedIPs = 172.16.0.4/32
 ```
 
@@ -77,11 +77,11 @@ It also creates client config files, like `example-privlan.net/deltaflyer/wg8.co
 ```
 $ cat example-privlan.net/deltaflyer/wg8.conf
 [Interface]
-PrivateKey = YFk9yzOm034FliXitQMHk+AQ6zR9WMnTI3PocWudOnw=
+PrivateKey = aHV2bo5FJyMig9UPJp1VInPaDWFuv1nGTPusN6AM/nA=
 Address = 172.16.0.4/24
 
 [Peer]
-PublicKey = 5JX5wa7rzSgCfC1gbaehNFO8JvU8FL8bvbfE7PUe1nA=
+PublicKey = dJRmSceGu8TEf2x9vCZX2LVpCEQAVb7XPe54ggf9QRQ=
 AllowedIPs = 172.16.0.0/24
 Endpoint = my-host.example.com:51820
 PersistentKeepalive = 60
