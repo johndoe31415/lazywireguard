@@ -34,7 +34,7 @@ class CIDR():
 		self._taken = set()
 		self._subnet = int(match["subnet"])
 		self._net = sum(value << (8 * index) for (index, value) in enumerate(reversed(list(int(match["no" + str(i)]) for i in range(4)))))
-		self._last_ip = self._net + (1 << self._subnet) - 2
+		self._last_ip = self._net + (1 << (32 - self._subnet)) - 2
 		self._mask = ((1 << self._subnet) - 1) << (32 - self._subnet)
 		if (self._net & ~self._mask) != 0:
 			net = self._net & self._mask
