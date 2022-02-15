@@ -1,5 +1,5 @@
 #	lazywireguard - Quick setup of Wireguard keys and routing table
-#	Copyright (C) 2021-2021 Johannes Bauer
+#	Copyright (C) 2021-2022 Johannes Bauer
 #
 #	This file is part of lazywireguard.
 #
@@ -52,6 +52,11 @@ class CIDR():
 	@staticmethod
 	def _int2ipv4(intval):
 		return "%d.%d.%d.%d" % ((intval >> 24) & 0xff, (intval >> 16) & 0xff, (intval >> 8) & 0xff, (intval >> 0) & 0xff)
+
+	def set_start(self, address):
+		address = self.plausibilize(address)
+		assert(self._net <= address <= self._last_ip)
+		self._index = address - self._net - 1
 
 	def claim(self, address):
 		self._taken.add(self.plausibilize(address))

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #	lazywireguard - Quick setup of Wireguard keys and routing table
-#	Copyright (C) 2021-2021 Johannes Bauer
+#	Copyright (C) 2021-2022 Johannes Bauer
 #
 #	This file is part of lazywireguard.
 #
@@ -52,6 +52,9 @@ class WGGenerator():
 		self._assign_ip_addresses()
 
 	def _assign_ip_addresses(self):
+		if "start" in self._config["network"]:
+			self._cidr.set_start(self._config["network"]["start"])
+
 		for host in self.all_hosts:
 			if "fixed_ip" in host:
 				self._cidr.claim(host["fixed_ip"])
