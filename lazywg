@@ -26,9 +26,12 @@ import json
 import contextlib
 import subprocess
 import re
+import collections
+import itertools
 from FriendlyArgumentParser import FriendlyArgumentParser
 from CIDR import CIDR
 from CmdlineEscape import CmdlineEscape
+from WireguardGenerator import WireguardGenerator
 
 parser = FriendlyArgumentParser(description = "Simple example application.")
 parser.add_argument("-o", "--output-dir", metavar = "path", help = "Specifies output directory to use. Defaults to the network domainname.")
@@ -37,7 +40,11 @@ parser.add_argument("config_file", help = "JSON configuration file for VPN setup
 args = parser.parse_args(sys.argv[1:])
 
 
-class WGGenerator():
+wggen = WireguardGenerator(args)
+sys.exit(0)
+
+
+class xxxWGGenerator():
 	_RULE_SYNTAX = re.compile(r"(?P<lhs>[^\s]+)\s+(?P<arrow>(<-|->|<->))\s+(?P<rhs>[^\s]+)")
 
 	def __init__(self, args):
@@ -49,11 +56,16 @@ class WGGenerator():
 			self._config["concentrator"]["name"] = "concentrator"
 		self._plausibilize()
 		self._meta = { }
+		self._group_members = collections.defaultdict(list)
 		self._assign_ip_addresses()
 
 	def _assign_ip_addresses(self):
 		if "start" in self._config["network"]:
 			self._cidr.set_start(self._config["network"]["start"])
+
+		for host in self._config["clients"]:
+			if "group" in host:
+				self._group_members[host["group"]].append(host["name"])
 
 		for host in self.all_hosts:
 			if "fixed_ip" in host:
@@ -150,13 +162,34 @@ class WGGenerator():
 		if only_established:
 			cmd += [ "-m", "state", "--state", "ESTABLISHED,RELATED" ]
 		if src != "*":
-			cmd += [ "-s", self._meta[src]["address"] ]
+			cmd += [ "-s", src ]
 		if dst != "*":
-			cmd += [ "-d", self._meta[dst]["address"] ]
+			cmd += [ "-d", dst ]
 		cmd += [ "-j", "ACCEPT" ]
 		rule_text = "%s -> %s" % (src, dst) if (not only_established) else "only established: %s -> %s" % (src, dst)
 		cmd += [ "-m", "comment", "--comment", rule_text ]
 		return cmd
+
+	def _resolve_routing_target(self, host):
+		if host == "*":
+			yield host
+		elif host.startswith("!"):
+			# Explicit address, take as-is
+			yield host[1:]
+		elif host.startswith("@"):
+			# Whole group
+			group_name = host[1:]
+			for member in self._group_members[group_name]:
+				yield from self._resolve_routing_target(member)
+		else:
+			# Group member
+			yield self._meta[host]["address"]
+
+	def _iptables_rules(self, ifname, src, dst, only_established = False):
+		srcs = self._resolve_routing_target(src)
+		dsts = self._resolve_routing_target(dst)
+		for (ipsrc, ipdst) in itertools.product(srcs, dsts):
+			yield self._iptables_rule(ifname, ipsrc, ipdst, only_established)
 
 	def _generate_routing_table(self):
 		host = self._config["concentrator"]
@@ -178,8 +211,10 @@ class WGGenerator():
 				uni_directional = (match["arrow"] == "->")
 				if uni_directional:
 					# Initial packets are okay, but we only route back estalibshed/related connections
-					print(cle.cmdline(self._iptables_rule(ifname, match["lhs"], match["rhs"])), file = f)
-					print(cle.cmdline(self._iptables_rule(ifname, match["rhs"], match["lhs"], only_established = True)), file = f)
+					for rule in self._iptables_rules(ifname, match["lhs"], match["rhs"]):
+						print(cle.cmdline(rule), file = f)
+					for rule in self._iptables_rules(ifname, match["rhs"], match["lhs"], only_established = True):
+						print(cle.cmdline(rule), file = f)
 				else:
 					print(cle.cmdline(self._iptables_rule(ifname, match["lhs"], match["rhs"])), file = f)
 					print(cle.cmdline(self._iptables_rule(ifname, match["rhs"], match["lhs"])), file = f)
