@@ -94,31 +94,54 @@ class WGGenerator():
 		for host in self.all_hosts:
 			yield host["name"]
 
+	def _to_host_ip(self, net):
+		is_ipv4 = "." in net
+		if is_ipv4:
+			return net.split("/", maxsplit = 1)[0] + "/32"
+		else:
+			return net.split("/", maxsplit = 1)[0] + "/128"
+
 	def _generate_server(self, definition):
 		filename = self._meta[definition["name"]]["config_filename"]
 		with open(filename, "w") as f:
+			addresses = [ "%s/%d" % (self._meta[definition["name"]]["address"], self._cidr.subnet) ]
+			if "additional_addrs" in self._config["network"]:
+				addresses += self._config["network"]["additional_addrs"]
+
 			print("[Interface]", file = f)
-			print("Address = %s/%d" % (self._meta[definition["name"]]["address"], self._cidr.subnet), file = f)
+			print("Address = %s" % (", ".join(addresses)), file = f)
 			print("ListenPort = %d" % (self._config["concentrator"].get("port", 51820)), file = f)
 			print("PrivateKey = %s" % (self._meta[definition["name"]]["privkey"]), file = f)
 
 			for client in self._config["clients"]:
+				allowed_ips = [ "%s/32" % (self._meta[client["name"]]["address"]) ]
+				if "additional_addrs" in client:
+					allowed_ips += [ self._to_host_ip(ip) for ip in client["additional_addrs"] ]
 				print(file = f)
 				print("# %s" % (client["name"]), file = f)
 				print("[Peer]", file = f)
 				print("PublicKey = %s" % (self._meta[client["name"]]["pubkey"]), file = f)
-				print("AllowedIPs = %s/32" % (self._meta[client["name"]]["address"]), file = f)
+				print("AllowedIPs = %s" % (", ".join(allowed_ips)), file = f)
 
 	def _generate_client(self, definition):
 		filename = self._meta[definition["name"]]["config_filename"]
 		with open(filename, "w") as f:
+			addresses = [ "%s/%d" % (self._meta[definition["name"]]["address"], self._cidr.subnet) ]
+			if "additional_addrs" in definition:
+				addresses += definition["additional_addrs"]
 			print("[Interface]", file = f)
 			print("PrivateKey = %s" % (self._meta[definition["name"]]["privkey"]), file = f)
-			print("Address = %s/%d" % (self._meta[definition["name"]]["address"], self._cidr.subnet), file = f)
+			print("Address = %s" % (", ".join(addresses)), file = f)
 			print(file = f)
+
+#			allowed_ips = [ "%s/%d" % (self._cidr.net, self._cidr.subnet) ]
+			allowed_ips = [ ]
+			if "additional_nets" in self._config["network"]:
+				allowed_ips += self._config["network"]["additional_nets"]
 			print("[Peer]", file = f)
 			print("PublicKey = %s" % (self._meta[self._config["concentrator"]["name"]]["pubkey"]), file = f)
-			print("AllowedIPs = %s/%d" % (self._cidr.net, self._cidr.subnet), file = f)
+			if len(allowed_ips) > 0:
+				print("AllowedIPs = %s" % (", ".join(allowed_ips)), file = f)
 			print("Endpoint = %s:%d" % (self._config["concentrator"]["hostname"], self._config["concentrator"].get("port", 51820)), file = f)
 			print("PersistentKeepalive = 60", file = f)
 
