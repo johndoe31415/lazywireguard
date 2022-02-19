@@ -108,33 +108,33 @@ route will be set to use them.
 
 Note that in the routing setup you can use various placeholders:
 
-  * A simple string references a host name. E.g., "foo -> bar" means host "foo"
-    should be allowed to talk to host "bar".
-  * As asterisk "*" means "everwhere". E.g., "foo -> *" allows host foo to talk
+  * A simple string references a host name. E.g., `foo -> bar` means host `foo`
+    should be allowed to talk to host `bar`.
+  * As asterisk `*` means "everwhere". E.g., `foo -> *` allows host foo to talk
     to all destinations.
-  * A prefix "@" means "group". E.g., "@mygroup -> foo" allows all hosts in
+  * A prefix `@` means "group". E.g., `@mygroup -> foo` allows all hosts in
     group "mygroup" to talk to host foo.
-  * An exclamation mark "!" prefix means "literal address/network". E.g.,
-    "@mygroup -> 1.2.3.4" allows all hosts in "mygroup" to talk to 1.2.3.4.
+  * An exclamation mark `!` prefix means "literal address/network". E.g.,
+    `@mygroup -> 1.2.3.4` allows all hosts in "mygroup" to talk to 1.2.3.4.
 
 The arrows have also different meaning:
 
-  * The single arrow "->" means "route on the tunnel interface
+  * The single arrow `->` means "route on the tunnel interface
     unidirectionally, but route established/related connections back". For
-    example, "foo -> bar" allows "foo" to establish a TCP connection to "bar" and
-    those hosts will then be able to talk to each other bidirectionally, but "bar"
+    example, `foo -> bar` allows `foo` to establish a TCP connection to `bar` and
+    those hosts will then be able to talk to each other bidirectionally, but `bar`
     would not be able to initiate that connection.
-  * The double-sided arrow "<->" marks a bidirectional connection on the tunnel
-    interface, i.e., in the above example "foo <-> bar" would mean either "foo"
-    or "bar" could establish a connection to its respective peer.
+  * The double-sided arrow `<->` marks a bidirectional connection on the tunnel
+    interface, i.e., in the above example `foo <-> bar` would mean either `foo`
+    or `bar` could establish a connection to its respective peer.
   * The fat arrow is like the single arrow (e.g., => instead of -> or <=>
     instead of <->) but it limits traffic to not only the tunnel interface. For
-    example, "foo -> *" means that host "foo" can reach everyone on the tunnel
-    interface of the concentrator, but "foo => *" would mean foo can reach *any*
+    example, `foo -> *` means that host `foo` can reach everyone on the tunnel
+    interface of the concentrator, but `foo => *` would mean foo can reach *any*
     destination whatsoever. So when you have an external network that you would
-    like to allow routes to, you typically want to use this variant, such as "foo
-    => 10.20.0.0/16" so that host "foo" can reach this external network (which is
-    on some other interface on the concentrator).
+    like to allow routes to, you typically want to use this variant, such as
+    `foo => 10.20.0.0/16` so that host `foo` can reach this external network (which
+    is on some other interface on the concentrator).
 
 A more complex example that showcases all functionality can be seen in
 `example_config_05_extnet.json`:
