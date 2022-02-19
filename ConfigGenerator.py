@@ -78,11 +78,13 @@ class ConfigGenerator():
 		return ", ".join(address_strs)
 
 	def _generate_peer_client(self, f):
+		allowed_networks = [ assigner.root_network for assigner in self._wggen.networks ]
+		allowed_networks += self._wggen.routed
+
 		print("[Peer]", file = f)
 		print("Endpoint = %s:%d" % (self._wggen.concentrator["hostname"], self._wggen.concentrator["port"]), file = f)
 		print("PublicKey = %s" % (self._wggen.concentrator["key"]["public"]), file = f)
-		if len(self._wggen.routed) > 0:
-			print("AllowedIPs = %s" % (", ".join(str(net) for net in self._wggen.routed)), file = f)
+		print("AllowedIPs = %s" % (", ".join(str(net) for net in allowed_networks)), file = f)
 		print("PersistentKeepalive = 60", file = f)
 
 	def _generate_peer_server(self, f):
