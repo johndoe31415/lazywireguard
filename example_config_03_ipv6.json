@@ -1,0 +1,41 @@
+{
+	"topology": {
+		"networks": [
+			{
+				"network":		"172.16.0.0/24"
+			},
+			{
+				"network":		"fd11:2233::0/64",
+				"exclude": [
+					"fd11:2233::01",
+					[ "fd11:2233::03", "fd11:2233::05" ]
+				]
+			}
+		],
+		"domainname": "example-privlan.net"
+	},
+	"concentrator": {
+		"name":		"concentrator",
+		"hostname":	"my-host.example.com",
+		"port":		51820
+	},
+	"clients": [
+		{
+			"name": "ds9",
+			"address": [ "fd11:2233::01", "172.16.0.9" ]
+		},
+		{
+			"name": "reliant",
+			"address": "172.16.0.1"
+		},
+		{
+			"name": "deltaflyer",
+			"ifname": "wg8",
+			"address": "fd11:2233::02"
+		}
+	],
+	"route": [
+		"* -> ds9",
+		"reliant <-> deltaflyer"
+	]
+}

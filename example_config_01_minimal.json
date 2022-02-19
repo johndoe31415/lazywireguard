@@ -1,0 +1,19 @@
+{
+	"topology": {
+		"networks": [
+			{
+				"network":		"172.16.0.0/24"
+			}
+		],
+		"domainname": "example-privlan.net"
+	},
+	"concentrator": {
+		"name":		"concentrator",
+		"hostname":	"my-host.example.com"
+	},
+	"clients": [
+		{ "name": "ds9" },
+		{ "name": "reliant"	},
+		{ "name": "deltaflyer" }
+	]
+}

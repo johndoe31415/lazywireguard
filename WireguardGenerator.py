@@ -41,6 +41,7 @@ class WireguardGenerator():
 		self._reserve_fixed_addresses()
 		self._check_duplicate_fixed_addresses()
 		self._assign_addresses()
+		self._assign_default_server_port()
 
 		self._hosts_by_name = { host["name"]: host for host in self.hosts }
 		self._groups = self._determine_groups()
@@ -140,6 +141,10 @@ class WireguardGenerator():
 	def _assign_addresses(self):
 		for host in self.hosts:
 			self._assign_host_address(host)
+
+	def _assign_default_server_port(self):
+		if "port" not in self.concentrator:
+			self.concentrator["port"] = 51820
 
 	def _determine_groups(self):
 		groups = collections.defaultdict(list)
