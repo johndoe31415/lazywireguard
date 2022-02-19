@@ -26,6 +26,7 @@ import collections
 from AddressAssigner import AddressAssigner
 from ConfigGenerator import ConfigGenerator
 from IPTablesRulesGenerator import IPTablesRulesGenerator
+from ArchivePacker import ArchivePacker
 from Exceptions import NetworkOverlapException, DuplicateNameException, InvalidFixedAddressException, NoSuchHostException
 
 class WireguardGenerator():
@@ -61,6 +62,10 @@ class WireguardGenerator():
 	@property
 	def routing_rules(self):
 		yield from self._config.get("route", [ ])
+
+	@property
+	def groups(self):
+		return iter(self._groups.items())
 
 	def get_host(self, name):
 		if name not in self._hosts_by_name:
@@ -167,15 +172,15 @@ class WireguardGenerator():
 		yield self.concentrator
 		yield from self.clients
 
-	def _get_output_directory(self, host):
+	def get_output_directory(self, host_name):
 		if self._args.output_dir is None:
-			return self._config["topology"]["domainname"] + "/" + host["name"]
+			return self._config["topology"]["domainname"] + "/" + host_name
 		else:
-			return self._args.output_dir + "/" + host["name"]
+			return self._args.output_dir + "/" + host_name
 
 	def run(self):
 		# First create all keys (so the public keys for all configs are known)
-		generators = [ ConfigGenerator(self, host, self._get_output_directory(host)) for host in self.hosts ]
+		generators = [ ConfigGenerator(self, host, self.get_output_directory(host["name"])) for host in self.hosts ]
 		for generator in generators:
 			generator.generate_keys()
 
@@ -184,6 +189,13 @@ class WireguardGenerator():
 			generator.generate()
 
 		# For the concentrator, generate the iptables file
-		iptables_filename = self._get_output_directory(self.concentrator) + "/iptables.sh"
+		iptables_filename = self.get_output_directory(self.concentrator["name"]) + "/iptables.sh"
 		iptrg = IPTablesRulesGenerator(self)
 		iptrg.generate(iptables_filename)
+
+		# Finally, pack up into .tar.gz archives if the user wants that.
+		packer = ArchivePacker(self)
+		if self._args.create_tar_gz:
+			packer.create_all_host_archives()
+		if self._args.create_group_tar_gz:
+			packer.create_group_archives()

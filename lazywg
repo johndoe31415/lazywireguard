@@ -24,7 +24,9 @@ import sys
 from FriendlyArgumentParser import FriendlyArgumentParser
 from WireguardGenerator import WireguardGenerator
 
-parser = FriendlyArgumentParser(description = "Simple example application.")
+parser = FriendlyArgumentParser(description = "Easy WireGuard configuration file creation.")
+parser.add_argument("-t", "--create-tar-gz", action = "store_true", help = "After creating all the files, also pack them up into a .tar.gz file for each host.")
+parser.add_argument("-g", "--create-group-tar-gz", action = "store_true", help = "Similar like the option before, but instead of creating host-individual files, create a .tar.gz for each defined group that contains all configurations of that group.")
 parser.add_argument("-o", "--output-dir", metavar = "path", help = "Specifies output directory to use. Defaults to the network domainname.")
 parser.add_argument("-v", "--verbose", action = "count", default = 0, help = "Increases verbosity. Can be specified multiple times to increase.")
 parser.add_argument("config_file", help = "JSON configuration file for VPN setup")
