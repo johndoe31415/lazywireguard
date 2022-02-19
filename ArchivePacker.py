@@ -45,4 +45,4 @@ class ArchivePacker():
 			targz_filename = self._wggen.get_output_directory(group_name) + ".tar.gz"
 			outdirs = [ self._wggen.get_output_directory(host["name"]) for host in members ]
 			outdirs.sort()
-			return self._create_tar_gz(targz_filename, outdirs)
+			self._create_tar_gz(targz_filename, outdirs)

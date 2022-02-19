@@ -65,7 +65,7 @@ class WireguardGenerator():
 
 	@property
 	def groups(self):
-		return iter(self._groups.items())
+		return self._groups.items()
 
 	def get_host(self, name):
 		if name not in self._hosts_by_name:
