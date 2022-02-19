@@ -127,8 +127,8 @@ The arrows have also different meaning:
   * The double-sided arrow `<->` marks a bidirectional connection on the tunnel
     interface, i.e., in the above example `foo <-> bar` would mean either `foo`
     or `bar` could establish a connection to its respective peer.
-  * The fat arrow is like the single arrow (e.g., => instead of -> or <=>
-    instead of <->) but it limits traffic to not only the tunnel interface. For
+  * The fat arrow is like the single arrow (e.g., `=>` instead of `->` or `<=>`
+    instead of `<->`) but it limits traffic to not only the tunnel interface. For
     example, `foo -> *` means that host `foo` can reach everyone on the tunnel
     interface of the concentrator, but `foo => *` would mean foo can reach *any*
     destination whatsoever. So when you have an external network that you would
