@@ -2,7 +2,7 @@
 	"topology": {
 		"networks": [
 			{
-				"network":		"172.16.0.0/24"
+				"network": "172.16.0.0/24"
 			}
 		],
 		"domainname": "example-privlan.net"
@@ -13,7 +13,7 @@
 	},
 	"clients": [
 		{ "name": "ds9" },
-		{ "name": "reliant"	},
+		{ "name": "reliant" },
 		{ "name": "deltaflyer" }
 	]
 }

@@ -11,23 +11,23 @@ Take a look at the minimal configuration, `example_config_01_minimal.json`:
 
 ```json
 {
-	"topology": {
-		"networks": [
-			{
-				"network":		"172.16.0.0/24"
-			}
-		],
-		"domainname": "example-privlan.net"
-	},
-	"concentrator": {
-		"name":		"concentrator",
-		"hostname":	"my-host.example.com"
-	},
-	"clients": [
-		{ "name": "ds9" },
-		{ "name": "reliant"	},
-		{ "name": "deltaflyer" }
-	]
+    "topology": {
+        "networks": [
+            {
+                "network": "172.16.0.0/24"
+            }
+        ],
+        "domainname": "example-privlan.net"
+    },
+    "concentrator": {
+        "name":     "concentrator",
+        "hostname": "my-host.example.com"
+    },
+    "clients": [
+        { "name": "ds9" },
+        { "name": "reliant" },
+        { "name": "deltaflyer" }
+    ]
 }
 ```
 
