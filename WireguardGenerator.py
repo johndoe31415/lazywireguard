@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #	lazywireguard - Quick setup of Wireguard keys and routing table
 #	Copyright (C) 2021-2022 Johannes Bauer
 #
@@ -24,6 +23,7 @@ import json
 import itertools
 import ipaddress
 from AddressAssigner import AddressAssigner
+from ConfigGenerator import ConfigGenerator
 from Exceptions import NetworkOverlapException, DuplicateNameException, InvalidFixedAddressException
 
 class WireguardGenerator():
@@ -48,6 +48,10 @@ class WireguardGenerator():
 	def networks(self):
 		return self._networks
 
+	@property
+	def routed(self):
+		return self._routed
+
 	def _get_network_index(self, address):
 		for (index, net) in enumerate(self._networks):
 			if address in net.root_network:
@@ -55,9 +59,12 @@ class WireguardGenerator():
 		return None
 
 	def _check_networks_have_no_overlap(self):
-		for (net1, net2) in itertools.combinations(self._networks, 2):
-			if net1.root_network.overlaps(net2.root_network):
-				raise NetworkOverlapException("Networks may not overlap, but %s overlaps %s." % (net1.root_network, net2.root_network))
+		checked_networks = [ ("network", assigner.root_network) for assigner in self._networks ]
+		checked_networks += [ ("routed network", network) for network in self._routed ]
+
+		for ((text1, net1), (text2, net2)) in itertools.combinations(checked_networks, 2):
+			if net1.overlaps(net2):
+				raise NetworkOverlapException("Networks may not overlap, but %s %s overlaps %s %s." % (net1, text1, net2, text2))
 
 	def _check_no_duplicate_name(self):
 		seen_names = set()
@@ -66,9 +73,9 @@ class WireguardGenerator():
 				raise DuplicateNameException("Hostname '%s' used twice. Must be unique." % (host["name"]))
 
 	def _assign_server_client_fields(self):
-		self._config["concentrator"]["server"] = True
-		for client in self._config["clients"]:
-			self._config["concentrator"]["server"] = False
+		self.concentrator["server"] = True
+		for client in self.clients:
+			client["server"] = False
 
 	def _reserve_fixed_address(self, address):
 		address = ipaddress.ip_address(address)
@@ -116,6 +123,30 @@ class WireguardGenerator():
 			self._assign_host_address(host)
 
 	@property
-	def hosts(self):
-		yield self._config["concentrator"]
+	def concentrator(self):
+		return self._config["concentrator"]
+
+	@property
+	def clients(self):
 		yield from self._config["clients"]
+
+	@property
+	def hosts(self):
+		yield self.concentrator
+		yield from self.clients
+
+	def _get_output_directory(self, host):
+		if self._args.output_dir is None:
+			return self._config["topology"]["domainname"] + "/" + host["name"]
+		else:
+			return self._args.output_dir + "/" + host["name"]
+
+	def run(self):
+		# First create all keys (so the public keys for all configs are known)
+		generators = [ ConfigGenerator(self, host, self._get_output_directory(host)) for host in self.hosts ]
+		for generator in generators:
+			generator.generate_keys()
+
+		# Then, create all configuration files
+		for generator in generators:
+			generator.generate()

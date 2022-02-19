@@ -41,6 +41,8 @@ args = parser.parse_args(sys.argv[1:])
 
 
 wggen = WireguardGenerator(args)
+wggen.run()
+
 sys.exit(0)
 
 
