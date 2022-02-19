@@ -79,7 +79,7 @@ class ConfigGenerator():
 
 	def _generate_peer_client(self, f):
 		print("[Peer]", file = f)
-		print("Endpoint = %s:%d" % (self._wggen.concentrator["hostname"], self._wggen.concentrator["port"]), file = f)
+		print("Endpoint = %s:%d" % (self._wggen.concentrator["hostname"], self._wggen.concentrator.get("port", 51820)), file = f)
 		print("PublicKey = %s" % (self._wggen.concentrator["key"]["public"]), file = f)
 		if len(self._wggen.routed) > 0:
 			print("AllowedIPs = %s" % (", ".join(str(net) for net in self._wggen.routed)), file = f)

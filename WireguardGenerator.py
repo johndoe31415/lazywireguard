@@ -22,9 +22,11 @@
 import json
 import itertools
 import ipaddress
+import collections
 from AddressAssigner import AddressAssigner
 from ConfigGenerator import ConfigGenerator
-from Exceptions import NetworkOverlapException, DuplicateNameException, InvalidFixedAddressException
+from IPTablesRulesGenerator import IPTablesRulesGenerator
+from Exceptions import NetworkOverlapException, DuplicateNameException, InvalidFixedAddressException, NoSuchHostException
 
 class WireguardGenerator():
 	def __init__(self, args):
@@ -33,12 +35,15 @@ class WireguardGenerator():
 			self._config = json.load(f)
 		self._networks = [ AddressAssigner.parse(network) for network in self._config["topology"]["networks"] ]
 		self._routed = [ ipaddress.ip_network(network) for network in self._config["topology"].get("routed", [ ]) ]
-		self._check_networks_have_no_overlap()
 		self._check_no_duplicate_name()
+		self._check_networks_have_no_overlap()
 		self._assign_server_client_fields()
 		self._reserve_fixed_addresses()
 		self._check_duplicate_fixed_addresses()
 		self._assign_addresses()
+
+		self._hosts_by_name = { host["name"]: host for host in self.hosts }
+		self._groups = self._determine_groups()
 
 	@property
 	def config(self):
@@ -51,6 +56,20 @@ class WireguardGenerator():
 	@property
 	def routed(self):
 		return self._routed
+
+	@property
+	def routing_rules(self):
+		yield from self._config.get("route", [ ])
+
+	def get_host(self, name):
+		if name not in self._hosts_by_name:
+			raise NoSuchHostException("Host with name '%s' not defined." % (name))
+		return self._hosts_by_name[name]
+
+	def get_group_members(self, group_name):
+		if group_name not in self._groups:
+			raise NoSuchGroupException("Group with name '%s' not defined." % (group_name))
+		return self._groups[group_name]
 
 	def _get_network_index(self, address):
 		for (index, net) in enumerate(self._networks):
@@ -122,6 +141,14 @@ class WireguardGenerator():
 		for host in self.hosts:
 			self._assign_host_address(host)
 
+	def _determine_groups(self):
+		groups = collections.defaultdict(list)
+		for host in self.hosts:
+			if "group" in host:
+				group_name = host["group"]
+				groups[group_name].append(host)
+		return groups
+
 	@property
 	def concentrator(self):
 		return self._config["concentrator"]
@@ -150,3 +177,8 @@ class WireguardGenerator():
 		# Then, create all configuration files
 		for generator in generators:
 			generator.generate()
+
+		# For the concentrator, generate the iptables file
+		iptables_filename = self._get_output_directory(self.concentrator) + "/iptables.sh"
+		iptrg = IPTablesRulesGenerator(self)
+		iptrg.generate(iptables_filename)

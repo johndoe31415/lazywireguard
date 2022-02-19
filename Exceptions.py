@@ -23,3 +23,6 @@ class AssignmentException(Exception): pass
 class NetworkOverlapException(Exception): pass
 class DuplicateNameException(Exception): pass
 class InvalidFixedAddressException(Exception): pass
+class RuleParseException(Exception): pass
+class NoSuchGroupException(Exception): pass
+class NoSuchHostException(Exception): pass
