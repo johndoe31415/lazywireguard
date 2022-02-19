@@ -1,6 +1,5 @@
 import ipaddress
-
-class AssignmentException(Exception): pass
+from Exceptions import AssignmentException
 
 class AddressAssigner():
 	def __init__(self, root_network):
@@ -10,6 +9,10 @@ class AddressAssigner():
 		self.exclude_address(self._root_network.broadcast_address)
 		self._net_index = 0
 		self._addr_index = 0
+
+	@property
+	def root_network(self):
+		return self._root_network
 
 	def assign(self):
 		try:
@@ -25,6 +28,8 @@ class AddressAssigner():
 		return address
 
 	def exclude_address(self, address):
+		if address.version != self._root_network.version:
+			return
 		return self.exclude_net(ipaddress.ip_network(address))
 
 	def exclude_net(self, network):
@@ -40,7 +45,6 @@ class AddressAssigner():
 
 	@classmethod
 	def parse(cls, definition):
-		print(definition)
 		root_network = ipaddress.ip_network(definition["network"])
 		assigner = cls(root_network)
 		if "exclude" in definition:
@@ -54,8 +58,4 @@ class AddressAssigner():
 					exclude_nets = [ ipaddress.ip_network(exclude_def) ]
 				for exclude_net in exclude_nets:
 					assigner.exclude_net(exclude_net)
-
-		for i in range(100000):
-			print(assigner.assign())
-
 		return assigner
