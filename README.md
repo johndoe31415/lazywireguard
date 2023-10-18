@@ -115,7 +115,7 @@ Note that in the routing setup you can use various placeholders:
   * A prefix `@` means "group". E.g., `@mygroup -> foo` allows all hosts in
     group "mygroup" to talk to host foo.
   * An exclamation mark `!` prefix means "literal address/network". E.g.,
-    `@mygroup -> 1.2.3.4` allows all hosts in "mygroup" to talk to 1.2.3.4.
+    `@mygroup -> !1.2.3.4` allows all hosts in "mygroup" to talk to 1.2.3.4.
 
 The arrows have also different meaning:
 
