@@ -183,9 +183,9 @@ class WireguardGenerator():
 
 	def get_output_directory(self, host_name):
 		if self._args.output_dir is None:
-			return self._config["topology"]["domainname"] + "/" + host_name
+			return f"{self._config['topology']['domainname']}/{host_name}"
 		else:
-			return self._args.output_dir + "/" + host_name
+			return f"{self._args.output_dir}/{host_name}"
 
 	def run(self):
 		# First create all keys (so the public keys for all configs are known)
