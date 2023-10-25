@@ -68,14 +68,14 @@ class ConfigGenerator():
 			pubkey = f.read().rstrip("\r\n")
 		self._host["key"]["public"] = pubkey
 
-	def _get_assigned_address_str(self, host, only_host = False):
+	def _get_assigned_addresses(self, host, only_host = False):
 		address_strs = [ ]
 		for (addr, net) in zip(host["assigned"], self._wggen.networks):
 			if not only_host:
 				address_strs.append("%s/%d" % (addr, net.root_network.prefixlen))
 			else:
 				address_strs.append("%s/%d" % (addr, addr.max_prefixlen))
-		return ", ".join(address_strs)
+		return address_strs
 
 	def _generate_peer_client(self, f):
 		allowed_networks = [ assigner.root_network for assigner in self._wggen.networks ]
@@ -89,10 +89,12 @@ class ConfigGenerator():
 
 	def _generate_peer_server(self, f):
 		for client in self._wggen.clients:
+			allowed_networks = self._get_assigned_addresses(client, only_host = True)
+			allowed_networks += [ str(network) for network in self._wggen.routed ]
 			print("# %s" % (client["name"]), file = f)
 			print("[Peer]", file = f)
 			print("PublicKey = %s" % (client["key"]["public"]), file = f)
-			print("AllowedIPs = %s" % (self._get_assigned_address_str(client, only_host = True)), file = f)
+			print("AllowedIPs = %s" % (", ".join(allowed_networks)), file = f)
 			print(file = f)
 
 	def generate(self):
@@ -102,7 +104,7 @@ class ConfigGenerator():
 			print("# Do not edit manually.", file = f)
 			print(file = f)
 			print("[Interface]", file = f)
-			print("Address = %s" % (self._get_assigned_address_str(self._host)), file = f)
+			print("Address = %s" % (", ".join(self._get_assigned_addresses(self._host))), file = f)
 			if self._host["server"]:
 				print("ListenPort = %d" % (self._wggen.concentrator["port"]), file = f)
 
