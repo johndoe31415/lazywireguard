@@ -105,11 +105,16 @@ class ConfigGenerator():
 			print("# Do not edit manually.", file = f)
 			print(file = f)
 			print("[Interface]", file = f)
+
 			print("Address = %s" % (", ".join(self._get_assigned_addresses(self._host))), file = f)
 			if self._host["server"]:
 				print("ListenPort = %d" % (self._wggen.concentrator["port"]), file = f)
 
 			print("PrivateKey = %s" % (self._host["key"]["private"]), file = f)
+			if self._wggen.any_ipv6_used:
+				# IPv6 requires a minimum MTU of 1280
+				print("MTU = 1400", file = f)
+
 			print(file = f)
 			if self._host["server"]:
 				self._generate_peer_server(f)

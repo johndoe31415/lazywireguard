@@ -46,6 +46,7 @@ class WireguardGenerator():
 
 		self._hosts_by_name = { host["name"]: host for host in self.hosts }
 		self._groups = self._determine_groups()
+		self._any_ipv6_used = any(isinstance(network.root_network, ipaddress.IPv6Network) for network in self._networks)
 
 	@property
 	def config_filename(self):
@@ -70,6 +71,10 @@ class WireguardGenerator():
 	@property
 	def groups(self):
 		return self._groups.items()
+
+	@property
+	def any_ipv6_used(self):
+		return self._any_ipv6_used
 
 	def get_host(self, name):
 		if name not in self._hosts_by_name:
