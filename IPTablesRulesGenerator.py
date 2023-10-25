@@ -1,5 +1,5 @@
 #	lazywireguard - Quick setup of Wireguard keys and routing table
-#	Copyright (C) 2021-2022 Johannes Bauer
+#	Copyright (C) 2021-2023 Johannes Bauer
 #
 #	This file is part of lazywireguard.
 #
@@ -49,7 +49,7 @@ class IPTablesRule():
 	def _parse_rule(self):
 		match = self._RULE_SYNTAX.fullmatch(self._rule_str)
 		if match is None:
-			raise RuleParseException("Unable to parse routing rule: %s" % (self._rule_str))
+			raise RuleParseException(f"Unable to parse routing rule: {self._rule_str}")
 		match = match.groupdict()
 
 		if match["arrow"] == "<-":
@@ -96,7 +96,7 @@ class IPTablesRule():
 		if dst is not None:
 			cmd += [ "-d", str(dst) ]
 		cmd += [ "-j", "ACCEPT" ]
-		rule_text = self._rule_str if (not only_established) else "only established: %s" % (self._rule_str)
+		rule_text = self._rule_str if (not only_established) else f"only established: {self._rule_str}"
 		cmd += [ "-m", "comment", "--comment", rule_text ]
 		return cmd
 
@@ -110,14 +110,14 @@ class IPTablesRule():
 		host = self._config["concentrator"]
 		ifname = host.get("ifname", "wg0")
 		dirname = self.output_dir + "/" + host["name"]
-		filename = "%s/iptables.sh" % (dirname)
+		filename = f"{dirname}/iptables.sh"
 		with open(filename, "w") as f:
 			cle = CmdlineEscape()
 			print("#!/bin/bash", file = f)
 			for rule in self._config.get("route", [ ]):
 				match = self._RULE_SYNTAX.fullmatch(rule)
 				if match is None:
-					raise Exception("Unable to parse routing rule: %s" % (rule))
+					raise Exception(f"Unable to parse routing rule: {rule}")
 				match = match.groupdict()
 
 				if match["arrow"] == "<-":
@@ -156,7 +156,7 @@ class IPTablesRule():
 
 	def generate(self, f):
 		cle = CmdlineEscape()
-		print("# %s" % (self._rule_str), file = f)
+		print(f"# {self._rule_str}", file = f)
 		for command in self._iterate_commands():
 			print(cle.cmdline(command), file = f)
 		print(file = f)

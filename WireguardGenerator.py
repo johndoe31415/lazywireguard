@@ -78,12 +78,12 @@ class WireguardGenerator():
 
 	def get_host(self, name):
 		if name not in self._hosts_by_name:
-			raise NoSuchHostException("Host with name '%s' not defined." % (name))
+			raise NoSuchHostException(f"Host with name \"{name}\" not defined.")
 		return self._hosts_by_name[name]
 
 	def get_group_members(self, group_name):
 		if group_name not in self._groups:
-			raise NoSuchGroupException("Group with name '%s' not defined." % (group_name))
+			raise NoSuchGroupException(f"Group with name \"{group_name}\" not defined.")
 		return self._groups[group_name]
 
 	def _get_network_index(self, address):
@@ -98,13 +98,13 @@ class WireguardGenerator():
 
 		for ((text1, net1), (text2, net2)) in itertools.combinations(checked_networks, 2):
 			if net1.overlaps(net2):
-				raise NetworkOverlapException("Networks may not overlap, but %s %s overlaps %s %s." % (net1, text1, net2, text2))
+				raise NetworkOverlapException(f"Networks may not overlap, but {net1} {text1} overlaps {net2} {text2}.")
 
 	def _check_no_duplicate_name(self):
 		seen_names = set()
 		for host in self.hosts:
 			if host["name"] in seen_names:
-				raise DuplicateNameException("Hostname '%s' used twice. Must be unique." % (host["name"]))
+				raise DuplicateNameException(f"Hostname \"{host['name']}\" used twice. Must be unique.")
 
 	def _assign_server_client_fields(self):
 		self.concentrator["server"] = True
@@ -134,7 +134,7 @@ class WireguardGenerator():
 		for host in self.hosts:
 			for address in host["fixed_address"]:
 				if address in seen:
-					raise InvalidFixedAddressException("Host '%s' has invalid address %s which has been assigned to another host already." % (host["name"], address))
+					raise InvalidFixedAddressException(f"Host \"{host['name']}\" has invalid address {address} which has been assigned to another host already.")
 				seen.add(address)
 
 	def _assign_host_address(self, host):
@@ -142,9 +142,9 @@ class WireguardGenerator():
 		for address in host["fixed_address"]:
 			index = self._get_network_index(address)
 			if index is None:
-				raise InvalidFixedAddressException("Host '%s' has invalid address %s which falls into none of the networks." % (host["name"], address))
+				raise InvalidFixedAddressException(f"Host \"{host['name']}\" has invalid address {address} which falls into none of the networks.")
 			if assigned[index] is not None:
-				raise InvalidFixedAddressException("Host '%s' has already duplicate assignment with address %s; the same network has already been specified." % (host["name"], address))
+				raise InvalidFixedAddressException(f"Host \"{host['name']}\" has already duplicate assignment with address {address}; the same network has already been specified.")
 			assigned[index] = address
 
 		for (index, assigned_address) in enumerate(assigned):

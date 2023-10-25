@@ -1,5 +1,5 @@
 #	lazywireguard - Quick setup of Wireguard keys and routing table
-#	Copyright (C) 2021-2022 Johannes Bauer
+#	Copyright (C) 2021-2023 Johannes Bauer
 #
 #	This file is part of lazywireguard.
 #
@@ -44,7 +44,7 @@ class AddressAssigner():
 			try:
 				address = self._assignable[self._net_index][self._addr_index]
 			except IndexError:
-				raise AssignmentException("Ran out of IP addresses for network %s" % (self._root_network))
+				raise AssignmentException(f"Ran out of IP addresses for network {self._root_network}.")
 		self._addr_index += 1
 		return address
 

@@ -43,15 +43,15 @@ class ConfigGenerator():
 
 	@property
 	def config_filename(self):
-		return "%s/%s.conf" % (self._output_directory, self.ifname)
+		return f"{self._output_directory}/{self.ifname}.conf"
 
 	@property
 	def privkey_filename(self):
-		return "%s/%s-private.key" % (self._output_directory, self.ifname)
+		return f"{self._output_directory}/{self.ifname}-private.key"
 
 	@property
 	def pubkey_filename(self):
-		return "%s/%s-public.key" % (self._output_directory, self.ifname)
+		return f"{self._output_directory}/{self.ifname}-public.key"
 
 	def generate_keys(self):
 		self._host["key"] = { }
@@ -76,9 +76,9 @@ class ConfigGenerator():
 		address_strs = [ ]
 		for (addr, net) in zip(host["assigned"], self._wggen.networks):
 			if not only_host:
-				address_strs.append("%s/%d" % (addr, net.root_network.prefixlen))
+				address_strs.append(f"{addr}/{net.root_network.prefixlen}")
 			else:
-				address_strs.append("%s/%d" % (addr, addr.max_prefixlen))
+				address_strs.append(f"{addr}/{addr.max_prefixlen}")
 		return address_strs
 
 	def _generate_peer_client(self, f):
@@ -86,19 +86,19 @@ class ConfigGenerator():
 		allowed_networks += self._wggen.routed
 
 		print("[Peer]", file = f)
-		print("Endpoint = %s:%d" % (self._wggen.concentrator["hostname"], self._wggen.concentrator["port"]), file = f)
-		print("PublicKey = %s" % (self._wggen.concentrator["key"]["public"]), file = f)
-		print("AllowedIPs = %s" % (", ".join(str(net) for net in allowed_networks)), file = f)
+		print(f"Endpoint = {self._wggen.concentrator['hostname']}:{self._wggen.concentrator['port']}", file = f)
+		print(f"PublicKey = {self._wggen.concentrator['key']['public']}", file = f)
+		print(f"AllowedIPs = {', '.join(str(net) for net in allowed_networks)}", file = f)
 		print("PersistentKeepalive = 60", file = f)
 
 	def _generate_peer_server(self, f):
 		for client in self._wggen.clients:
 			allowed_networks = self._get_assigned_addresses(client, only_host = True)
 			allowed_networks += [ str(network) for network in self._wggen.routed ]
-			print("# %s" % (client["name"]), file = f)
+			print(f"# {client['name']}", file = f)
 			print("[Peer]", file = f)
-			print("PublicKey = %s" % (client["key"]["public"]), file = f)
-			print("AllowedIPs = %s" % (", ".join(allowed_networks)), file = f)
+			print(f"PublicKey = {client['key']['public']}", file = f)
+			print(f"AllowedIPs = {', '.join(allowed_networks)}", file = f)
 			print(file = f)
 
 	def generate(self):
@@ -110,11 +110,11 @@ class ConfigGenerator():
 			print(file = f)
 			print("[Interface]", file = f)
 
-			print("Address = %s" % (", ".join(self._get_assigned_addresses(self._host))), file = f)
+			print(f"Address = {', '.join(self._get_assigned_addresses(self._host))}", file = f)
 			if self._host["server"]:
-				print("ListenPort = %d" % (self._wggen.concentrator["port"]), file = f)
+				print(f"ListenPort = {self._wggen.concentrator['port']}", file = f)
 
-			print("PrivateKey = %s" % (self._host["key"]["private"]), file = f)
+			print(f"PrivateKey = {self._host['key']['private']}", file = f)
 			if self._wggen.any_ipv6_used:
 				# IPv6 requires a minimum MTU of 1280
 				print("MTU = 1400", file = f)
