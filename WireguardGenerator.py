@@ -1,5 +1,5 @@
 #	lazywireguard - Quick setup of Wireguard keys and routing table
-#	Copyright (C) 2021-2022 Johannes Bauer
+#	Copyright (C) 2021-2023 Johannes Bauer
 #
 #	This file is part of lazywireguard.
 #
@@ -32,7 +32,7 @@ from Exceptions import NetworkOverlapException, DuplicateNameException, InvalidF
 class WireguardGenerator():
 	def __init__(self, args):
 		self._args = args
-		with open(self._args.config_file) as f:
+		with open(self.config_filename) as f:
 			self._config = json.load(f)
 		self._networks = [ AddressAssigner.parse(network) for network in self._config["topology"]["networks"] ]
 		self._routed = [ ipaddress.ip_network(network) for network in self._config["topology"].get("routed", [ ]) ]
@@ -46,6 +46,10 @@ class WireguardGenerator():
 
 		self._hosts_by_name = { host["name"]: host for host in self.hosts }
 		self._groups = self._determine_groups()
+
+	@property
+	def config_filename(self):
+		return self._args.config_file
 
 	@property
 	def config(self):
