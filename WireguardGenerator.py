@@ -36,8 +36,9 @@ class WireguardGenerator():
 			self._config = json.load(f)
 		self._networks = [ AddressAssigner.parse(network) for network in self._config["topology"]["networks"] ]
 		self._routed = [ ipaddress.ip_network(network) for network in self._config["topology"].get("routed", [ ]) ]
-		self._check_no_duplicate_name()
 		self._check_networks_have_no_overlap()
+		self._resolve_iteration_clients()
+		self._check_no_duplicate_name()
 		self._assign_server_client_fields()
 		self._reserve_fixed_addresses()
 		self._check_duplicate_fixed_addresses()
@@ -105,6 +106,22 @@ class WireguardGenerator():
 		for host in self.hosts:
 			if host["name"] in seen_names:
 				raise DuplicateNameException(f"Hostname \"{host['name']}\" used twice. Must be unique.")
+
+	def _resolve_iteration_clients(self):
+		clients = [ ]
+		for client in self.clients:
+			if "template" not in client:
+				clients.append(client)
+			else:
+				for i in range(client["start"], client["end"] + 1):
+					name = client["template"].format(i = i)
+					client_instance = dict(client)
+					del client_instance["template"]
+					del client_instance["start"]
+					del client_instance["end"]
+					client_instance["name"] = name
+					clients.append(client_instance)
+		self._config["clients"] = clients
 
 	def _assign_server_client_fields(self):
 		self.concentrator["server"] = True

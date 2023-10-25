@@ -37,16 +37,7 @@
 			"ifname": "wg8",
 			"address": "fd11:2233::02"
 		},
-		{ "name": "group01-host01", "group": "group01" },
-		{ "name": "group01-host02", "group": "group01" },
-		{ "name": "group01-host03", "group": "group01" },
-		{ "name": "group01-host04", "group": "group01" },
-		{ "name": "group01-host05", "group": "group01" },
-		{ "name": "group01-host06", "group": "group01" },
-		{ "name": "group01-host07", "group": "group01" },
-		{ "name": "group01-host08", "group": "group01" },
-		{ "name": "group01-host09", "group": "group01" },
-		{ "name": "group01-host10", "group": "group01" }
+		{ "template": "group01-host{i:02d}", "group": "group01", "start": 1, "end": 10 }
 	],
 	"route": [
 		"* -> ds9",
